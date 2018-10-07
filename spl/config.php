@@ -52,4 +52,4 @@ define("GET_API_KEY", "");
  *
  * @type int Json option constants
  */
-define("JSON_OPTIONS", 128);
+define("JSON_OPTIONS", JSON_PRETTY_PRINT);
