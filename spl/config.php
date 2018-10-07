@@ -37,14 +37,14 @@ define("AUTH_PASSWORD", "");
  *
  * @type string
  */
-define("POST_API_KEY", "mPostKey");
+define("POST_API_KEY", "");
 
 /**
  * A secret key for GET request.
  *
  * @type string
  */
-define("GET_API_KEY", "mGetKey");
+define("GET_API_KEY", "");
 
 /**
  * JSON options for all result message.
