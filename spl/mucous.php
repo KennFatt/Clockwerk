@@ -11,22 +11,24 @@
 
 declare(strict_types=1);
 
-if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW'])) {
-    die(json_encode([
-        "code" => 203,
-        "body" => [
-            "message" => "Non-Authoritative Information"
-        ],
-    ], JSON_OPTIONS));
-}
+if (AUTH_USERNAME !== "" || AUTH_PASSWORD !== "") {
+    if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW'])) {
+        die(json_encode([
+            "code" => 203,
+            "body" => [
+                "message" => "Non-Authoritative Information"
+            ],
+        ], JSON_OPTIONS));
+    }
 
-if ($_SERVER['PHP_AUTH_USER'] !== AUTH_USERNAME || $_SERVER['PHP_AUTH_PW'] !== AUTH_PASSWORD) {
-    die(json_encode([
-        "code" => 401,
-        "body" => [
-            "message" => "Unauthorized"
-        ],
-    ], JSON_OPTIONS));
+    if ($_SERVER['PHP_AUTH_USER'] !== AUTH_USERNAME || $_SERVER['PHP_AUTH_PW'] !== AUTH_PASSWORD) {
+        die(json_encode([
+            "code" => 401,
+            "body" => [
+                "message" => "Unauthorized"
+            ],
+        ], JSON_OPTIONS));
+    }
 }
 
 /**

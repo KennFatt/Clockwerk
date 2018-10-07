@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 /**
  * Basic Authentication (BA) username.
+ * NOTE: Leave it blank to disable BA,
  *
  * @type string
  */
@@ -25,6 +26,7 @@ define("AUTH_USERNAME", "");
 
 /**
  * Basic Authentication (BA) password.
+ * NOTE: Leave it blank to disable BA,
  *
  * @type string
  */
