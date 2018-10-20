@@ -14,7 +14,7 @@ declare(strict_types=1);
 /**
  * Clockwerk bootstrap
  */
-require 'spl/bootstrap.php';
+require 'src/spl/bootstrap.php';
 
 use clockwerk\webservice\ClockwerkRest;
 
