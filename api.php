@@ -26,4 +26,5 @@ define("ROOT_DIR", __DIR__);
 /**
  * Run the system.
  */
-(new ClockwerkRest($GLOBALS['CLOCKWERK_KEY'], $GLOBALS['CLOCKWERK_REQUEST']))->init();
+$rest = new ClockwerkRest($GLOBALS['REQUEST_ATTRIBUTES']);
+$rest->init();
