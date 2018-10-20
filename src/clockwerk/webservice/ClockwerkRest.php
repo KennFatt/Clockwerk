@@ -86,8 +86,6 @@ class ClockwerkRest
         $this->key = $attributes['key'];
         $this->putParams($attributes);
         $this->requestMethod = $_SERVER['REQUEST_METHOD'];
-
-        $this->init();
     }
 
     /**
