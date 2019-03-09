@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace clockwerk\webservice;
 
+use clockwerk\webservice\result\JsonResult;
 use clockwerk\webservice\result\ServiceResult;
 
 class ClockwerkRest {
@@ -55,10 +56,19 @@ class ClockwerkRest {
      */
     public function __construct(array $attributes) {
         self::$instance = $this;
+        if ($this->validateAttributes($attributes)) {
+            $this->close(new JsonResult(["Attributes is not fulfilled!"], 400));
+        }
+
         $this->userSession = $attributes['user'];
         $this->key = $attributes['key'];
         $this->putParams($attributes);
+
         $this->requestMethod = $_SERVER['REQUEST_METHOD'];
+    }
+
+    private function validateAttributes(array $attributes) : bool {
+        return !isset($attributes['user']) || !isset($attributes['key']);
     }
 
     /**
