@@ -13,16 +13,14 @@ declare(strict_types=1);
 
 namespace clockwerk\webservice\result;
 
-class JsonResult extends ServiceResult
-{
+class JsonResult extends ServiceResult {
     /**
      * JsonResult constructor.
      *
      * @param array $data
      * @param int   $statusCode
      */
-    public function __construct(array $data, int $statusCode)
-    {
+    public function __construct(array $data, int $statusCode) {
         $this->setResponseCode($statusCode);
 
         $result = [
@@ -38,8 +36,7 @@ class JsonResult extends ServiceResult
     /**
      * @return string
      */
-    public function __showResult() : string
-    {
+    public function __showResult(): string {
         return $this->getResult();
     }
 }

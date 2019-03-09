@@ -15,8 +15,7 @@ namespace clockwerk\webservice;
 
 use clockwerk\webservice\result\ServiceResult;
 
-class ClockwerkRest
-{
+class ClockwerkRest {
     /** @var ClockwerkRest|null */
     private static $instance = null;
 
@@ -50,13 +49,16 @@ class ClockwerkRest
     private $userSession = "";
 
     /**
-     * Getting instance.
+     * ClockwerkRest constructor.
      *
-     * @return ClockwerkRest|null
+     * @param array $attributes
      */
-    public static function getInstance() : ?ClockwerkRest
-    {
-        return self::$instance;
+    public function __construct(array $attributes) {
+        self::$instance = $this;
+        $this->userSession = $attributes['user'];
+        $this->key = $attributes['key'];
+        $this->putParams($attributes);
+        $this->requestMethod = $_SERVER['REQUEST_METHOD'];
     }
 
     /**
@@ -64,8 +66,7 @@ class ClockwerkRest
      *
      * @param array $params
      */
-    private function putParams(array $params) : void
-    {
+    private function putParams(array $params): void {
         unset($GLOBALS['REQUEST_ATTRIBUTES']);
 
         unset($params['user']);
@@ -75,24 +76,18 @@ class ClockwerkRest
     }
 
     /**
-     * ClockwerkRest constructor.
+     * Getting instance.
      *
-     * @param array $attributes
+     * @return ClockwerkRest|null
      */
-    public function __construct(array $attributes)
-    {
-        self::$instance = $this;
-        $this->userSession = $attributes['user'];
-        $this->key = $attributes['key'];
-        $this->putParams($attributes);
-        $this->requestMethod = $_SERVER['REQUEST_METHOD'];
+    public static function getInstance(): ?ClockwerkRest {
+        return self::$instance;
     }
 
     /**
      * Web Service initiator.
      */
-    public function init() : void
-    {
+    public function init(): void {
         // TODO
     }
 
@@ -101,8 +96,7 @@ class ClockwerkRest
      *
      * @return string
      */
-    public function getRequestMethod() : string
-    {
+    public function getRequestMethod(): string {
         return $this->requestMethod;
     }
 
@@ -111,8 +105,7 @@ class ClockwerkRest
      *
      * @return array
      */
-    public function getParams() : array
-    {
+    public function getParams(): array {
         return $this->params;
     }
 
@@ -121,8 +114,7 @@ class ClockwerkRest
      *
      * @return string
      */
-    public function getApiKey() : string
-    {
+    public function getApiKey(): string {
         return $this->key;
     }
 
@@ -131,8 +123,7 @@ class ClockwerkRest
      *
      * @param ServiceResult|null $result
      */
-    public function close(?ServiceResult $result) : void
-    {
+    public function close(?ServiceResult $result): void {
         // TODO: Cleanup
         $this->requestMethod = "";
         $this->params = [];

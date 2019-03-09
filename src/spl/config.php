@@ -22,7 +22,7 @@ declare(strict_types=1);
  *
  * @type string
  */
-define("AUTH_USERNAME", "");
+define("AUTH_USERNAME", "user");
 
 /**
  * Basic Authentication (BA) password.
@@ -30,21 +30,21 @@ define("AUTH_USERNAME", "");
  *
  * @type string
  */
-define("AUTH_PASSWORD", "");
+define("AUTH_PASSWORD", "user");
 
 /**
  * A secret key for POST request.
  *
  * @type string
  */
-define("POST_API_KEY", "");
+define("POST_API_KEY", "post_key");
 
 /**
  * A secret key for GET request.
  *
  * @type string
  */
-define("GET_API_KEY", "");
+define("GET_API_KEY", "get_key");
 
 /**
  * JSON options for all result message.
