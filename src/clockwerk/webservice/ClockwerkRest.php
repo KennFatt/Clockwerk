@@ -67,6 +67,13 @@ class ClockwerkRest {
         $this->requestMethod = $_SERVER['REQUEST_METHOD'];
     }
 
+    /**
+     * Validating some attributes before the system storing it into property.
+     *
+     * @param array $attributes
+     *
+     * @return bool
+     */
     private function validateAttributes(array $attributes) : bool {
         return !isset($attributes['user']) || !isset($attributes['key']);
     }
