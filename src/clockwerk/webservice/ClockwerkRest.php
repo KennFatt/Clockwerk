@@ -55,16 +55,15 @@ class ClockwerkRest {
      * @param array $attributes
      */
     public function __construct(array $attributes) {
-        self::$instance = $this;
         if ($this->validateAttributes($attributes)) {
             $this->close(new JsonResult(["Attributes is not fulfilled!"], 400));
         }
 
+        self::$instance = $this;
+        $this->requestMethod = $_SERVER['REQUEST_METHOD'];
         $this->userSession = $attributes['user'];
         $this->key = $attributes['key'];
         $this->putParams($attributes);
-
-        $this->requestMethod = $_SERVER['REQUEST_METHOD'];
     }
 
     /**
@@ -105,7 +104,7 @@ class ClockwerkRest {
      * Web Service initiator.
      */
     public function init(): void {
-        // TODO
+        // TODO: Initiate system workers.
     }
 
     /**
@@ -138,9 +137,9 @@ class ClockwerkRest {
     /**
      * Close the Web Service.
      *
-     * @param ServiceResult|null $result
+     * @param ServiceResult $result
      */
-    public function close(?ServiceResult $result): void {
+    public function close(ServiceResult $result): void {
         // TODO: Cleanup
         $this->requestMethod = "";
         $this->params = [];
