@@ -47,3 +47,4 @@ if ($parameters == []) {
 }
 
 $GLOBALS['REQUEST_ATTRIBUTES'] = $parameters;
+$parameters = null;
