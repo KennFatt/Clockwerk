@@ -55,7 +55,7 @@ abstract class ServiceResult {
      *
      * @return int
      */
-    public function getStatusCode(): int {
+    public function getStatusCode() : int {
         return $this->statusCode;
     }
 
@@ -64,7 +64,7 @@ abstract class ServiceResult {
      *
      * @param int $code
      */
-    public function setStatusCode(int $code): void {
+    public function setStatusCode(int $code) : void {
         $this->statusCode = $code;
     }
 
@@ -73,7 +73,7 @@ abstract class ServiceResult {
      *
      * @return string
      */
-    public function getResponseMessage(): string {
+    public function getResponseMessage() : string {
         return $this->responseMessage;
     }
 
@@ -91,7 +91,7 @@ abstract class ServiceResult {
      *
      * @return null|string
      */
-    public function getResult(): ?string {
+    public function getResult() : ?string {
         return $this->finalResult;
     }
 
@@ -101,7 +101,7 @@ abstract class ServiceResult {
      *
      * @param array $finalResult
      */
-    public function setResult(array $finalResult): void {
+    public function setResult(array $finalResult) : void {
         $this->finalResult = $finalResult;
     }
 
@@ -110,7 +110,7 @@ abstract class ServiceResult {
      *
      * @return string
      */
-    public function __showResult(): string {
+    public function __showResult() : string {
         return json_encode([
             "code" => $this->statusCode,
             "message" => $this->responseMessage,

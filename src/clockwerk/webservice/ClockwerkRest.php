@@ -51,7 +51,7 @@ class ClockwerkRest {
      *
      * @param array $params
      */
-    private function putParams(array $params): void {
+    private function putParams(array $params) : void {
         unset($GLOBALS['REQUEST_ATTRIBUTES']);
         $this->params = $params;
     }
@@ -61,17 +61,30 @@ class ClockwerkRest {
      *
      * @return ClockwerkRest|null
      */
-    public static function getInstance(): ?ClockwerkRest {
+    public static function getInstance() : ?ClockwerkRest {
         return self::$instance;
     }
 
     /**
      * Finalizing the service.
      */
-    public function finalize(): void {
+    public function finalize() : void {
         // TODO: Initiate system workers.
 
         $this->close(new ValidResponseResult([]));
+    }
+
+    /**
+     * Close the Web Service.
+     *
+     * @param ServiceResult $result
+     */
+    public function close(ServiceResult $result) : void {
+        // TODO: Cleanup
+        $this->requestMethod = "";
+        $this->params = [];
+
+        die($result->__showResult());
     }
 
     /**
@@ -79,7 +92,7 @@ class ClockwerkRest {
      *
      * @return string
      */
-    public function getRequestMethod(): string {
+    public function getRequestMethod() : string {
         return $this->requestMethod;
     }
 
@@ -88,21 +101,8 @@ class ClockwerkRest {
      *
      * @return array
      */
-    public function getParams(): array {
+    public function getParams() : array {
         return $this->params;
-    }
-
-    /**
-     * Close the Web Service.
-     *
-     * @param ServiceResult $result
-     */
-    public function close(ServiceResult $result): void {
-        // TODO: Cleanup
-        $this->requestMethod = "";
-        $this->params = [];
-
-        die($result->__showResult());
     }
 
 }
