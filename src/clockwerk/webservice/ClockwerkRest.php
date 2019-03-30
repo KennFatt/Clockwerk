@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace clockwerk\webservice;
 
-use clockwerk\webservice\result\JsonResult;
 use clockwerk\webservice\result\ServiceResult;
+use clockwerk\webservice\result\ValidResponseResult;
 
 class ClockwerkRest {
     /** @var ClockwerkRest|null */
@@ -36,45 +36,14 @@ class ClockwerkRest {
     private $params = [];
 
     /**
-     * Encrypted API key.
-     *
-     * @var string
-     */
-    private $key = "";
-
-    /**
-     * User session name.
-     *
-     * @var string
-     */
-    private $userSession = "";
-
-    /**
      * ClockwerkRest constructor.
      *
      * @param array $attributes
      */
     public function __construct(array $attributes) {
-        if ($this->validateAttributes($attributes)) {
-            $this->close(new JsonResult(["Attributes is not fulfilled!"], 400));
-        }
-
         self::$instance = $this;
         $this->requestMethod = $_SERVER['REQUEST_METHOD'];
-        $this->userSession = $attributes['user'];
-        $this->key = $attributes['key'];
         $this->putParams($attributes);
-    }
-
-    /**
-     * Validating some attributes before the system storing it into property.
-     *
-     * @param array $attributes
-     *
-     * @return bool
-     */
-    private function validateAttributes(array $attributes) : bool {
-        return !isset($attributes['user']) || !isset($attributes['key']);
     }
 
     /**
@@ -84,10 +53,6 @@ class ClockwerkRest {
      */
     private function putParams(array $params): void {
         unset($GLOBALS['REQUEST_ATTRIBUTES']);
-
-        unset($params['user']);
-        unset($params['key']);
-
         $this->params = $params;
     }
 
@@ -101,10 +66,12 @@ class ClockwerkRest {
     }
 
     /**
-     * Web Service initiator.
+     * Finalizing the service.
      */
-    public function init(): void {
+    public function finalize(): void {
         // TODO: Initiate system workers.
+
+        $this->close(new ValidResponseResult([]));
     }
 
     /**
@@ -126,15 +93,6 @@ class ClockwerkRest {
     }
 
     /**
-     * Get request API Key.
-     *
-     * @return string
-     */
-    public function getApiKey(): string {
-        return $this->key;
-    }
-
-    /**
      * Close the Web Service.
      *
      * @param ServiceResult $result
@@ -143,7 +101,6 @@ class ClockwerkRest {
         // TODO: Cleanup
         $this->requestMethod = "";
         $this->params = [];
-        $this->key = "";
 
         die($result->__showResult());
     }

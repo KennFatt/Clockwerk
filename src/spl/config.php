@@ -34,11 +34,15 @@ define("AUTH_PASSWORD", "user");
 
 /**
  * This is an invalid response that represented by our system.
+ *
+ * @type string|int
  */
 define("INVALID_RESPONSE", 0x0);
 
 /**
  * This is a valid response that represented by our system.
+ *
+ * @type string|int
  */
 define("VALID_RESPONSE", 0x1);
 
