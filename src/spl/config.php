@@ -33,18 +33,14 @@ define("AUTH_USERNAME", "user");
 define("AUTH_PASSWORD", "user");
 
 /**
- * A secret key for POST request.
- *
- * @type string
+ * This is an invalid response that represented by our system.
  */
-define("POST_API_KEY", "post_key");
+define("INVALID_RESPONSE", 0x0);
 
 /**
- * A secret key for GET request.
- *
- * @type string
+ * This is a valid response that represented by our system.
  */
-define("GET_API_KEY", "get_key");
+define("VALID_RESPONSE", 0x1);
 
 /**
  * JSON options for all result message.

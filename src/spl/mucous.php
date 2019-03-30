@@ -11,48 +11,39 @@
 
 declare(strict_types=1);
 
+/**
+ * Basic Authentication section.
+ * Validates all information of BA.
+ */
 if (AUTH_USERNAME !== "" || AUTH_PASSWORD !== "") {
     if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW'])) {
         die(json_encode([
-            "code" => 203,
-            "message" => "Non-Authoritative Information"
+            "code" => INVALID_RESPONSE,
+            "message" => "Non-Authorized."
         ], JSON_OPTIONS));
     }
 
     if ($_SERVER['PHP_AUTH_USER'] !== AUTH_USERNAME || $_SERVER['PHP_AUTH_PW'] !== AUTH_PASSWORD) {
         die(json_encode([
-            "code" => 401,
-            "message" => "Unauthorized"
+            "code" => INVALID_RESPONSE,
+            "message" => "Authentication failed!"
         ], JSON_OPTIONS));
     }
 }
 
 /**
- * Validating method request.
- *
- * @param array $request
+ * Store the parameters into local variable.
  */
-function validateRequest(array $request = []) : void {
-    if ($request == [] || !isset($request['key'])) {
-        die(json_encode([
-            "code" => 400,
-            "message" => "Bad Request"
-        ], JSON_OPTIONS));
-    }
+$parameters = $_GET == [] ? $_POST : $_GET;
 
-    switch ($request['key']) {
-        case GET_API_KEY:
-        case POST_API_KEY:
-        $GLOBALS['REQUEST_ATTRIBUTES'] = $request;
-            break;
-
-        default:
-            die(json_encode([
-                "code" => 400,
-                "message" => "Bad Request"
-            ], JSON_OPTIONS));
-            break;
-    }
+/**
+ * Close the system when parameters is zero given.
+ */
+if ($parameters == []) {
+    die(json_encode([
+        "code" => INVALID_RESPONSE,
+        "message" => "There is no such parameters."
+    ], JSON_OPTIONS));
 }
 
-validateRequest($_GET == [] ? $_POST : $_GET);
+$GLOBALS['REQUEST_ATTRIBUTES'] = $parameters;
