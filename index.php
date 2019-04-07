@@ -27,4 +27,3 @@ define("ROOT_DIR", __DIR__);
  * Run the system.
  */
 $rest = new ClockwerkRest($GLOBALS['REQUEST_ATTRIBUTES']);
-$rest->finalize();

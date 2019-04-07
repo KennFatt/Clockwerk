@@ -37,14 +37,14 @@ define("AUTH_PASSWORD", "user");
  *
  * @type string|int
  */
-define("INVALID_RESPONSE", 0x0);
+define("INVALID_RESPONSE", 0x00);
 
 /**
  * This is a valid response that represented by our system.
  *
  * @type string|int
  */
-define("VALID_RESPONSE", 0x1);
+define("VALID_RESPONSE", 0x01);
 
 /**
  * JSON options for all result message.
@@ -53,3 +53,10 @@ define("VALID_RESPONSE", 0x1);
  * @type int Json option constants
  */
 define("JSON_OPTIONS", JSON_PRETTY_PRINT);
+
+/**
+ * Services directory's name.
+ *
+ * @type string
+ */
+define("SERVICES_FOLDER", "services");
