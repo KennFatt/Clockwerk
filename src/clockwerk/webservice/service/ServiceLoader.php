@@ -11,9 +11,22 @@
 namespace clockwerk\webservice\service;
 
 class ServiceLoader {
+    /** @var ServiceManager|null  */
     private $serviceManager = null;
+
+    /**
+     * Stack of valid scripts.
+     *
+     * @var array
+     */
     private $scripts = [];
 
+    /**
+     * ServiceLoader constructor.
+     *
+     * @param ServiceManager $manager
+     * @param string         $path Path to 'services' folder.
+     */
     public function __construct(ServiceManager $manager, string $path) {
         $scannedScript = [];
 
@@ -40,35 +53,18 @@ class ServiceLoader {
         $this->loadScripts($scannedScript);
     }
 
-    private function loadScripts(array $scannedScript) : void {
-        foreach ($scannedScript as $path) {
-            $info = $this->getScriptInfo($path);
-            if ($info == null) {
-                continue;
-            }
-
-            if (isset($info['enable']) && strtolower($info['enable']) == "false") {
-                continue;
-            }
-
-            if (!isset($info['name']) || !isset($info['description']) || !isset($info['version'])) {
-                continue;
-            }
-
-            /**
-             * Storing a service into known scripts.
-             *
-             *  TODO:
-             *  Add a checking-system before storing it into $scripts.
-             *  Follow-up: Use is_a(); and filename must be equals as its class name.
-             */
-            $raw = explode(DIRECTORY_SEPARATOR, $path);
-            $this->scripts[] = explode(".", $raw[count($raw) - 1])[0];
-
-            include_once $path;
-        }
+    /**
+     * @return ServiceManager
+     */
+    private function getServiceManager() : ServiceManager {
+        return $this->serviceManager;
     }
 
+    /**
+     * Get all loaded scripts.
+     *
+     * @return array
+     */
     public function getScripts() : array {
         return $this->scripts;
     }
@@ -76,11 +72,6 @@ class ServiceLoader {
     /**
      * Parsing script's description into structured data (array).
      * The original code was written by @shoghicp https://github.com/shoghicp thanks to him.
-     *
-     * Current available tags:
-     * - (at)name Identify the script.
-     * - (at)description Short description about your script.
-     * - (at)version Script's version.
      *
      * @param string $file
      *
@@ -99,10 +90,20 @@ class ServiceLoader {
 
             if(preg_match("/^[ \t]+\\*[ \t]+@([a-zA-Z]+)([ \t]+(.*))?$/", $line, $matches) > 0){
                 $key = $matches[1];
-                $content = trim($matches[3] ?? "");
-
                 if($key === "notscript"){
                     return null;
+                }
+
+                $content = trim($matches[3] ?? "");
+
+                if (strtolower($content) == "false") {
+                    $content = false;
+                } elseif (strtolower($content) == "true") {
+                    $content = true;
+                }
+
+                if (!stripos($content, ",")) {
+                    $content = explode(",", $content);
                 }
 
                 $data[$key] = $content;
@@ -118,5 +119,39 @@ class ServiceLoader {
         }
 
         return null;
+    }
+
+    /**
+     * Registering the script into system and storing it into scripts stack.
+     *
+     * @param array $scannedScript
+     */
+    private function loadScripts(array $scannedScript) : void {
+        foreach ($scannedScript as $path) {
+            $info = $this->getScriptInfo($path);
+            if ($info == null) {
+                continue;
+            }
+
+            if (isset($info['enable']) && strtolower($info['enable']) == 0x00) {
+                continue;
+            }
+
+            if (isset($info['dependencies'])) {
+
+            }
+
+            $raw = explode(DIRECTORY_SEPARATOR, $path);
+            $scriptFileName = explode(".", $raw[count($raw) - 1])[0];
+            $this->scripts[$scriptFileName] = [
+                "name" => $info['name'] ?? $scriptFileName,
+                "description" => $info['description'] ?? "",
+                "version" => $info['version'] ?? "0.0.1",
+                "enable" => true,
+                "timeout" => $info['timeout'] ?? 5
+            ];
+
+            include_once $path;
+        }
     }
 }
