@@ -24,6 +24,6 @@ use clockwerk\webservice\ClockwerkRest;
 define("ROOT_DIR", __DIR__);
 
 /**
- * Run the system.
+ * Create new instance.
  */
-$rest = new ClockwerkRest($GLOBALS['REQUEST_ATTRIBUTES']);
+new ClockwerkRest($GLOBALS['REQUEST_ATTRIBUTES']);

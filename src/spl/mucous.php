@@ -12,6 +12,21 @@
 declare(strict_types=1);
 
 /**
+ * Store the parameters into local variable.
+ */
+$parameters = $_GET == [] ? $_POST : $_GET;
+
+/**
+ * Close the system when parameters is zero given.
+ */
+if ($parameters == []) {
+    die(json_encode([
+        "code" => INVALID_RESPONSE,
+        "message" => "There is no such parameters."
+    ], JSON_OPTIONS));
+}
+
+/**
  * Basic Authentication section.
  * Validates all information of BA.
  */
@@ -32,19 +47,42 @@ if (AUTH_USERNAME !== "" || AUTH_PASSWORD !== "") {
 }
 
 /**
- * Store the parameters into local variable.
+ * Secret Key validation.
+ * TODO: Add reserved key "key" to doc.
  */
-$parameters = $_GET == [] ? $_POST : $_GET;
+if (SECRET_KEY !== "") {
+    $dieFlag = false;
+    if (!isset($parameters["key"])) {
+        $dieFlag = true;
+    } elseif (!is_int(stripos($parameters["key"], SECRET_KEY))) {
+        $dieFlag = true;
+    }
+    if ($dieFlag) {
+        die(json_encode([
+            "code" => INVALID_RESPONSE,
+            "message" => "Invalid secret key!"
+        ], JSON_OPTIONS));
+    }
+    unset($parameters["key"]);
+}
 
 /**
- * Close the system when parameters is zero given.
+ * Filtering variables input.
  */
-if ($parameters == []) {
-    die(json_encode([
-        "code" => INVALID_RESPONSE,
-        "message" => "There is no such parameters."
-    ], JSON_OPTIONS));
+$i = VARS_MAX_LENGTH > 0 ? 0 : null;
+$filteredParams = [];
+foreach ($parameters as $key => $val) {
+    if ($i !== null && $i >= VARS_MAX_LENGTH) {
+        break;
+    }
+
+    if (KEY_MAX_LENGTH > 0) {
+        // TODO: Lanjutin ini
+    }
+
+    if ($i !== null) {
+        $i++;
+    }
 }
 
 $GLOBALS['REQUEST_ATTRIBUTES'] = $parameters;
-$parameters = null;

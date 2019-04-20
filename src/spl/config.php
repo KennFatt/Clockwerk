@@ -55,8 +55,32 @@ define("VALID_RESPONSE", 0x01);
 define("JSON_OPTIONS", JSON_PRETTY_PRINT);
 
 /**
- * Services directory's name.
+ * Path to service folder.
  *
  * @type string
  */
-define("SERVICES_FOLDER", "services");
+define("SERVICES_FOLDER_PATH", ROOT_DIR . DIRECTORY_SEPARATOR . "services" . DIRECTORY_SEPARATOR);
+
+/**
+ * Secret Key between client and server.
+ * Note: Plain text as secret key is NOT recommended! Please put encrypted string.
+ * Leave it blank if you want to skip Secret Key validation.
+ *
+ * @type string
+ */
+define("SECRET_KEY", "");
+
+/**
+ * Maximum length of variables input.
+ */
+define("VARS_MAX_LENGTH", 100);
+
+/**
+ * Maximum length of key variable.
+ */
+define("KEY_MAX_LENGTH", 16);
+
+/**
+ * Maximum length of value variable.
+ */
+define("VALUE_MAX_LENGTH", 16);

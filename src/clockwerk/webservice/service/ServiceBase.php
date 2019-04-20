@@ -54,13 +54,6 @@ abstract class ServiceBase {
     private $collectible = false;
 
     /**
-     * Determine the service is has been executed.
-     *
-     * @var bool
-     */
-    private $executed = false;
-
-    /**
      * Given parameters to the service.
      *
      * @var array
@@ -88,15 +81,6 @@ abstract class ServiceBase {
     public function onExecute() : void {}
 
     /**
-     * Determine that the service has been executed.
-     *
-     * @return bool
-     */
-    public function isExecuted() : bool {
-        return $this->executed;
-    }
-
-    /**
      * Determine that the service is ready to be collected.
      *
      * @return bool
@@ -120,13 +104,17 @@ abstract class ServiceBase {
     /**
      * Get final collection data.
      *
-     * @return array
+     * @return array|null
      */
-    public function getCollection() : array {
-        return [
-            "message" => $this->message,
-            "data" => $this->result
-        ];
+    public function getCollection() : ?array {
+        if ($this->message && $this->result) {
+            return [
+                "message" => $this->message,
+                "data" => $this->result
+            ];
+        }
+
+        return null;
     }
 
     /**

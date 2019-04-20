@@ -26,8 +26,16 @@ class ServiceManager {
      */
     private $services = [];
 
-    
+    /**
+     * TODO: Implement dependencies
+     *
+     * @var array
+     */
     private $dependencies = [];
+
+    private $executedServices = [];
+
+    private $resultPool = [];
 
     /**
      * ServiceManager constructor.
@@ -48,13 +56,6 @@ class ServiceManager {
     }
 
     /**
-     * @return ServiceLoader
-     */
-    private function getLoader() : ServiceLoader {
-        return $this->loader;
-    }
-
-    /**
      * Load all the scripts by ServiceLoader.
      * Then, create new instance of each services.
      *
@@ -62,10 +63,10 @@ class ServiceManager {
      */
     private function init() : void {
         if ($this->loader == null) {
-            $this->loader = new ServiceLoader($this, ROOT_DIR . DIRECTORY_SEPARATOR . SERVICES_FOLDER . DIRECTORY_SEPARATOR);
+            $this->loader = new ServiceLoader($this, SERVICES_FOLDER_PATH);
         }
 
-        foreach ($this->getLoader()->getScripts() as $scriptName => $scriptMeta) {
+        foreach ($this->loader->getScripts() as $scriptName => $scriptMeta) {
             /**
              * TODO:
              *
@@ -85,26 +86,38 @@ class ServiceManager {
         }
     }
 
-    public function serveRequest(string $serviceName) : ?array {
-        if (!isset($this->services[$serviceName])) {
+    public function dispatchService(string $serviceName) {
+        /** @var ServiceBase|null $service */
+        $service = $this->services[$serviceName];
+
+        if ($service == null) {
             return null;
         }
 
-        /** @var ServiceBase $service */
-        $service = $this->services[$serviceName];
+        $timeoutHandler = function(float $startTime) use ($service) : bool {
+            $deltaTime = (int) (microtime(true) - $startTime);
+            if ($deltaTime >= $service->getTimeout()) {
+                return true;
+            }
+            return false;
+        };
+
         $startTime = microtime(true);
         while (!$service->isCollectible()) {
-            if (!$service->isExecuted()) {
+            if (!isset($this->executedServices[$serviceName])) {
                 $service->onExecute();
+                $this->executedServices[$serviceName] = true;
             }
 
-            $currentTime = microtime(true);
-            $elapsedTime = (int) ($currentTime - $startTime);
-            if ($elapsedTime >= $service->getTimeout()) {
+            if ($timeoutHandler($startTime)) {
                 return null;
             }
         }
+        $this->executedServices[$serviceName] = null;
 
-        return $service->getCollection();
+        $collection = $service->getCollection();
+        $this->resultPool[$serviceName] = $collection;
+
+        return $collection;
     }
 }

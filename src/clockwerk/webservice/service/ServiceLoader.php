@@ -10,6 +10,8 @@
 
 namespace clockwerk\webservice\service;
 
+use DirectoryIterator;
+
 class ServiceLoader {
     /** @var ServiceManager|null  */
     private $serviceManager = null;
@@ -21,6 +23,8 @@ class ServiceLoader {
      */
     private $scripts = [];
 
+    private $scriptsFile = [];
+
     /**
      * ServiceLoader constructor.
      *
@@ -28,36 +32,24 @@ class ServiceLoader {
      * @param string         $path Path to 'services' folder.
      */
     public function __construct(ServiceManager $manager, string $path) {
-        $scannedScript = [];
-
+        $this->serviceManager = $manager;
         if (!is_dir($path)) {
             mkdir($path);
             $manager->getServer()->sendResult("[*] No services available.");
             return;
-        } else {
-            foreach (new \DirectoryIterator($path) as $file) {
-                if (!$file->isFile() || $file->getFilename() == "." || $file->getFilename() == ".." || $file->getExtension() !== "php") {
-                    continue;
-                }
-
-                $scannedScript[] = $file->getPathname();
-            }
         }
-
-        if ($scannedScript == []) {
+        $this->filterScriptsFile($path);
+        if ($this->scriptsFile == []) {
             $manager->getServer()->sendResult("[**] No services available.");
             return;
         }
 
-        $this->serviceManager = $manager;
-        $this->loadScripts($scannedScript);
-    }
-
-    /**
-     * @return ServiceManager
-     */
-    private function getServiceManager() : ServiceManager {
-        return $this->serviceManager;
+        $requestedService = $manager->getServer()->getRequestedService();
+        if (is_string($requestedService) && strlen($requestedService) > 0) {
+            $this->loadScript($requestedService);
+        } else {
+            $this->loadScripts();
+        }
     }
 
     /**
@@ -67,6 +59,70 @@ class ServiceLoader {
      */
     public function getScripts() : array {
         return $this->scripts;
+    }
+
+    private function filterScriptsFile(string $path) : void {
+        foreach (new DirectoryIterator($path) as $file) {
+            if (!$file->isFile() || $file->getFilename() == "." || $file->getFilename() == ".." || $file->getExtension() !== "php") {
+                continue;
+            }
+            $fileName = substr($file->getFilename(), 0, strpos($file->getFilename(), "."));
+            $this->scriptsFile[$fileName] = $file->getPathname();
+        }
+    }
+
+    private function isValidScript(string $scriptFile) : bool {
+        $info = $this->getScriptInfo($scriptFile);
+        if ($info == null) {
+            return false;
+        }
+
+        if (isset($info['enable']) && strtolower($info['enable']) == 0x00) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private function loadScript(string $scriptName, bool $loadDependencies = true) : bool {
+        $scriptInfo = $this->getScriptInfo($this->scripts[$scriptName]);
+        if ($scriptInfo == null) {
+            return false;
+        }
+        if ($loadDependencies && !empty($scriptInfo['depends'])) {
+            // TODO: Load each dependencies
+            foreach ($scriptInfo['depends'] as $depend) {
+                if (!isset($this->scriptsFile[$depend])) {
+                    continue;
+                }
+
+                $this->loadScript($depend, false);
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Registering the script into system and storing it into scripts stack.
+     */
+    private function loadScripts() : void {
+        $scannedScript = $this->scriptsFile;
+        foreach ($scannedScript as $fileName => $path) {
+            $info = $this->getScriptInfo($path);
+
+
+            $this->scripts[$fileName] = [
+                "name" => $fileName,
+                "description" => $info['description'] ?? "",
+                "version" => $info['version'] ?? "0.0.1",
+                "enable" => true,
+                "timeout" => $info['timeout'] ?? 5,
+                "depends" => $info['depends'] ?? []
+            ];
+
+            include_once $path;
+        }
     }
 
     /**
@@ -79,9 +135,7 @@ class ServiceLoader {
      */
     private function getScriptInfo(string $file) : ?array{
         $content = file($file, 1 << 1 | 1 << 2);
-
         $data = [];
-
         $insideHeader = false;
         foreach($content as $line){
             if(!$insideHeader and strpos($line, "/**") !== false){
@@ -95,7 +149,6 @@ class ServiceLoader {
                 }
 
                 $content = trim($matches[3] ?? "");
-
                 if (strtolower($content) == "false") {
                     $content = false;
                 } elseif (strtolower($content) == "true") {
@@ -119,39 +172,5 @@ class ServiceLoader {
         }
 
         return null;
-    }
-
-    /**
-     * Registering the script into system and storing it into scripts stack.
-     *
-     * @param array $scannedScript
-     */
-    private function loadScripts(array $scannedScript) : void {
-        foreach ($scannedScript as $path) {
-            $info = $this->getScriptInfo($path);
-            if ($info == null) {
-                continue;
-            }
-
-            if (isset($info['enable']) && strtolower($info['enable']) == 0x00) {
-                continue;
-            }
-
-            if (isset($info['dependencies'])) {
-
-            }
-
-            $raw = explode(DIRECTORY_SEPARATOR, $path);
-            $scriptFileName = explode(".", $raw[count($raw) - 1])[0];
-            $this->scripts[$scriptFileName] = [
-                "name" => $info['name'] ?? $scriptFileName,
-                "description" => $info['description'] ?? "",
-                "version" => $info['version'] ?? "0.0.1",
-                "enable" => true,
-                "timeout" => $info['timeout'] ?? 5
-            ];
-
-            include_once $path;
-        }
     }
 }

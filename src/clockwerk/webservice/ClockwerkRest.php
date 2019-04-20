@@ -19,9 +19,6 @@ use clockwerk\webservice\result\ValidResponseResult;
 use clockwerk\webservice\service\ServiceManager;
 
 class ClockwerkRest {
-    /** @var ClockwerkRest|null */
-    private static $instance = null;
-
     /** @var ServiceManager|null */
     private $serviceManager = null;
 
@@ -53,7 +50,6 @@ class ClockwerkRest {
      * @param array $attributes
      */
     public function __construct(array $attributes) {
-        self::$instance = $this;
         $this->requestMethod = $_SERVER['REQUEST_METHOD'];
         $this->putParams($attributes);
         $this->serviceManager = new ServiceManager($this);
@@ -78,15 +74,6 @@ class ClockwerkRest {
     }
 
     /**
-     * Getting instance.
-     *
-     * @return ClockwerkRest|null
-     */
-    public static function getInstance() : ?ClockwerkRest {
-        return self::$instance;
-    }
-
-    /**
      * Finalizing the service.
      */
     private function finalize() : void {
@@ -94,12 +81,15 @@ class ClockwerkRest {
          * Until this step, the main goal was achieved.
          * But there is so much things to add later.
          * Such a security purpose, compatibility, documentation, and others things to ready for production.
+         *
+         * TODO: If there is no given service, it means to load all the services and getting the final result.
+         * Also, this method is look more fancier that the "?service=" way.
          */
         if ($this->getRequestedService() == "") {
-            $this->sendResult("Invalid request.");
-        }
 
-        $finalResult = $this->serviceManager->serveRequest($this->requestedService);
+        } else {
+            $finalResult = $this->serviceManager->dispatchService($this->getRequestedService());
+        }
 
         $this->sendResult($finalResult == null ? "Something went wrong with the service, try again later!" : $finalResult);
     }
@@ -133,6 +123,7 @@ class ClockwerkRest {
 
     /**
      * Send the final result to user and close the system.
+     * TODO: Remove this.
      *
      * @param string     $message
      * @param array|null $data
@@ -144,14 +135,11 @@ class ClockwerkRest {
 
     /**
      * Close the Web Service.
+     * TODO: Do some refactor.
      *
      * @param ServiceResult $result
      */
     private function close(ServiceResult $result) : void {
-        // TODO: Cleanup
-        $this->requestMethod = "";
-        $this->params = [];
-
         die($result->__showResult());
     }
 }

@@ -9,7 +9,13 @@
 use clockwerk\webservice\service\ServiceBase;
 
 class DummyClass extends ServiceBase {
-    public function execute() : void {
-        $this->setTimeout(5);
+    public function onLoad() : void {
+
     }
+
+    public function onExecute() : void {
+
+    }
+
+
 }
