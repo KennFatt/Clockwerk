@@ -71,16 +71,24 @@ define("SERVICES_FOLDER_PATH", ROOT_DIR . DIRECTORY_SEPARATOR . "services" . DIR
 define("SECRET_KEY", "");
 
 /**
+ * This is an option to allow controlling all variables input.
+ */
+define("ENABLE_VARS_CONTROL", true);
+
+/**
  * Maximum length of variables input.
+ * @see \ENABLE_VARS_CONTROL
  */
 define("VARS_MAX_LENGTH", 100);
 
 /**
  * Maximum length of key variable.
+ * @see \ENABLE_VARS_CONTROL
  */
 define("KEY_MAX_LENGTH", 16);
 
 /**
  * Maximum length of value variable.
+ * @see \ENABLE_VARS_CONTROL
  */
 define("VALUE_MAX_LENGTH", 16);

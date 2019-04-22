@@ -69,20 +69,36 @@ if (SECRET_KEY !== "") {
 /**
  * Filtering variables input.
  */
-$i = VARS_MAX_LENGTH > 0 ? 0 : null;
-$filteredParams = [];
-foreach ($parameters as $key => $val) {
-    if ($i !== null && $i >= VARS_MAX_LENGTH) {
-        break;
-    }
+if (ENABLE_VARS_CONTROL) {
+    $maxInputHandler = function(int &$current, bool &$flag, int $maxVars) : void {
+        ++$current;
+        $flag = $current < $maxVars ? false : true;
+    };
+    $lengthHandler = function(string $k, string $v, bool &$flag, int $maxKeyLength, int $maxValLength) : void {
+        if ($maxKeyLength > 0 && strlen($k) > $maxKeyLength) {
+            $flag = false;
+        }
+        if ($maxValLength > 0 && strlen($v) > $maxValLength) {
+            $flag = false;
+        }
+    };
 
-    if (KEY_MAX_LENGTH > 0) {
-        // TODO: Lanjutin ini
-    }
+    $tmp = 0;
+    $validEntry = true;
+    $newParameters = [];
+    foreach ($parameters as $k => $v) {
+        if (VARS_MAX_LENGTH > 0) {
+            $maxInputHandler($tmp, $validEntry, VARS_MAX_LENGTH);
+        }
+        $lengthHandler($k, $v, $validEntry, KEY_MAX_LENGTH, VALUE_MAX_LENGTH);
 
-    if ($i !== null) {
-        $i++;
+        if (!$validEntry) {
+            $validEntry = true;
+            continue;
+        }
+        $newParameters[$k] = $v;
     }
+    $parameters = $newParameters;
 }
 
 $GLOBALS['REQUEST_ATTRIBUTES'] = $parameters;
