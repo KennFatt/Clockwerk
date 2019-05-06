@@ -30,7 +30,7 @@ if ($parameters == []) {
  * Basic Authentication section.
  * Validates all information of BA.
  */
-if (AUTH_USERNAME !== "" || AUTH_PASSWORD !== "") {
+if (AUTH_USERNAME !== "" && AUTH_PASSWORD !== "") {
     if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW'])) {
         die(json_encode([
             "code" => INVALID_RESPONSE,
