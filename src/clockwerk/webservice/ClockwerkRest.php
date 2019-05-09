@@ -13,12 +13,14 @@ declare(strict_types=1);
 
 namespace clockwerk\webservice;
 
+use clockwerk\webservice\result\InvalidResponseResult;
 use clockwerk\webservice\result\ServiceResult;
+use clockwerk\webservice\result\ValidResponseResult;
+use clockwerk\webservice\service\ServiceManager;
 
-class ClockwerkRest
-{
-    /** @var ClockwerkRest|null */
-    private static $instance = null;
+class ClockwerkRest {
+    /** @var ServiceManager|null */
+    private $serviceManager = null;
 
     /**
      * Request method as a string.
@@ -36,27 +38,23 @@ class ClockwerkRest
     private $params = [];
 
     /**
-     * Encrypted API key.
+     * Requested service of the client.
      *
      * @var string
      */
-    private $key = "";
+    private $requestedService = "";
 
     /**
-     * User session name.
+     * ClockwerkRest constructor.
      *
-     * @var string
+     * @param array $attributes
      */
-    private $userSession = "";
+    public function __construct(array $attributes) {
+        $this->requestMethod = $_SERVER['REQUEST_METHOD'];
+        $this->putParams($attributes);
+        $this->serviceManager = new ServiceManager($this);
 
-    /**
-     * Getting instance.
-     *
-     * @return ClockwerkRest|null
-     */
-    public static function getInstance() : ?ClockwerkRest
-    {
-        return self::$instance;
+        $this->finalize();
     }
 
     /**
@@ -64,36 +62,45 @@ class ClockwerkRest
      *
      * @param array $params
      */
-    private function putParams(array $params) : void
-    {
+    private function putParams(array $params) : void {
         unset($GLOBALS['REQUEST_ATTRIBUTES']);
 
-        unset($params['user']);
-        unset($params['key']);
+        if (isset($params['service'])) {
+            $this->requestedService = $params['service'];
+            unset($params['service']);
+        }
 
         $this->params = $params;
     }
 
     /**
-     * ClockwerkRest constructor.
-     *
-     * @param array $attributes
+     * Finalizing the service.
      */
-    public function __construct(array $attributes)
-    {
-        self::$instance = $this;
-        $this->userSession = $attributes['user'];
-        $this->key = $attributes['key'];
-        $this->putParams($attributes);
-        $this->requestMethod = $_SERVER['REQUEST_METHOD'];
+    private function finalize() : void {
+        /**
+         * Until this step, the main goal was achieved.
+         * But there is so much things to add later.
+         * Such a security purpose, compatibility, documentation, and others things to ready for production.
+         *
+         * TODO: If there is no given service, it means to load all the services and getting the final result.
+         * Also, this method is look more fancier that the "?service=" way.
+         */
+        if ($this->getRequestedService() == "") {
+
+        } else {
+            $finalResult = $this->serviceManager->dispatchService($this->getRequestedService());
+        }
+
+        $this->sendResult($finalResult == null ? "Something went wrong with the service, try again later!" : $finalResult);
     }
 
     /**
-     * Web Service initiator.
+     * Get requested service of the client.
+     *
+     * @return string
      */
-    public function init() : void
-    {
-        // TODO
+    public function getRequestedService() : string {
+        return $this->requestedService;
     }
 
     /**
@@ -101,8 +108,7 @@ class ClockwerkRest
      *
      * @return string
      */
-    public function getRequestMethod() : string
-    {
+    public function getRequestMethod() : string {
         return $this->requestMethod;
     }
 
@@ -111,34 +117,29 @@ class ClockwerkRest
      *
      * @return array
      */
-    public function getParams() : array
-    {
+    public function getParams() : array {
         return $this->params;
     }
 
     /**
-     * Get request API Key.
+     * Send the final result to user and close the system.
+     * TODO: Remove this.
      *
-     * @return string
+     * @param string     $message
+     * @param array|null $data
      */
-    public function getApiKey() : string
-    {
-        return $this->key;
+    public function sendResult(string $message, ?array $data = null) : void {
+        $res = $data == null ? new InvalidResponseResult($message) : new ValidResponseResult($data, $message);
+        $this->close($res);
     }
 
     /**
      * Close the Web Service.
+     * TODO: Do some refactor.
      *
-     * @param ServiceResult|null $result
+     * @param ServiceResult $result
      */
-    public function close(?ServiceResult $result) : void
-    {
-        // TODO: Cleanup
-        $this->requestMethod = "";
-        $this->params = [];
-        $this->key = "";
-
+    private function close(ServiceResult $result) : void {
         die($result->__showResult());
     }
-
 }

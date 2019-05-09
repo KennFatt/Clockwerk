@@ -11,48 +11,94 @@
 
 declare(strict_types=1);
 
-if (AUTH_USERNAME !== "" || AUTH_PASSWORD !== "") {
+/**
+ * Store the parameters into local variable.
+ */
+$parameters = $_GET == [] ? $_POST : $_GET;
+
+/**
+ * Close the system when parameters is zero given.
+ */
+if ($parameters == []) {
+    die(json_encode([
+        "code" => INVALID_RESPONSE,
+        "message" => "There is no such parameters."
+    ], JSON_OPTIONS));
+}
+
+/**
+ * Basic Authentication section.
+ * Validates all information of BA.
+ */
+if (AUTH_USERNAME !== "" && AUTH_PASSWORD !== "") {
     if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW'])) {
         die(json_encode([
-            "code" => 203,
-            "message" => "Non-Authoritative Information"
+            "code" => INVALID_RESPONSE,
+            "message" => "Non-Authorized."
         ], JSON_OPTIONS));
     }
 
     if ($_SERVER['PHP_AUTH_USER'] !== AUTH_USERNAME || $_SERVER['PHP_AUTH_PW'] !== AUTH_PASSWORD) {
         die(json_encode([
-            "code" => 401,
-            "message" => "Unauthorized"
+            "code" => INVALID_RESPONSE,
+            "message" => "Authentication failed!"
         ], JSON_OPTIONS));
     }
 }
 
 /**
- * Validating method request.
- *
- * @param array $request
+ * Secret Key validation.
+ * TODO: Add reserved key "key" to doc.
  */
-function validateRequest(array $request = []) : void {
-    if ($request == [] || !isset($request['key'])) {
+if (SECRET_KEY !== "") {
+    $dieFlag = false;
+    if (!isset($parameters["key"])) {
+        $dieFlag = true;
+    } elseif (!is_int(stripos($parameters["key"], SECRET_KEY))) {
+        $dieFlag = true;
+    }
+    if ($dieFlag) {
         die(json_encode([
-            "code" => 400,
-            "message" => "Bad Request"
+            "code" => INVALID_RESPONSE,
+            "message" => "Invalid secret key!"
         ], JSON_OPTIONS));
     }
-
-    switch ($request['key']) {
-        case GET_API_KEY:
-        case POST_API_KEY:
-        $GLOBALS['REQUEST_ATTRIBUTES'] = $request;
-            break;
-
-        default:
-            die(json_encode([
-                "code" => 400,
-                "message" => "Bad Request"
-            ], JSON_OPTIONS));
-            break;
-    }
+    unset($parameters["key"]);
 }
 
-validateRequest($_GET == [] ? $_POST : $_GET);
+/**
+ * Filtering variables input.
+ */
+if (ENABLE_VARS_CONTROL) {
+    $maxInputHandler = function(int &$current, bool &$flag, int $maxVars) : void {
+        ++$current;
+        $flag = $current < $maxVars ? false : true;
+    };
+    $lengthHandler = function(string $k, string $v, bool &$flag, int $maxKeyLength, int $maxValLength) : void {
+        if ($maxKeyLength > 0 && strlen($k) > $maxKeyLength) {
+            $flag = false;
+        }
+        if ($maxValLength > 0 && strlen($v) > $maxValLength) {
+            $flag = false;
+        }
+    };
+
+    $tmp = 0;
+    $validEntry = true;
+    $newParameters = [];
+    foreach ($parameters as $k => $v) {
+        if (VARS_MAX_LENGTH > 0) {
+            $maxInputHandler($tmp, $validEntry, VARS_MAX_LENGTH);
+        }
+        $lengthHandler($k, $v, $validEntry, KEY_MAX_LENGTH, VALUE_MAX_LENGTH);
+
+        if (!$validEntry) {
+            $validEntry = true;
+            continue;
+        }
+        $newParameters[$k] = $v;
+    }
+    $parameters = $newParameters;
+}
+
+$GLOBALS['REQUEST_ATTRIBUTES'] = $parameters;

@@ -17,7 +17,7 @@ declare(strict_types=1);
 require 'config.php';
 
 /**
- * Clockwerk's first security.
+ * Clockwerk's first layer security.
  */
 require 'mucous.php';
 
